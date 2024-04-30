@@ -40,6 +40,7 @@ const endPoints = {
   archway: "https://api.mainnet.archway.io",
   sifchain: "https://sifchain-api.polkachu.com",
   nolus: "https://pirin-cl.nolus.network:1317",
+  nibiru: "https://lcd.nibiru.fi",
   bostrom: "https://lcd.bostrom.cybernode.ai"
 };
 
@@ -217,14 +218,14 @@ async function queryContractWithRetries({ contract, chain, data }) {
   }
 }
 
-async function queryManyContracts({ contracts = [], chain, data }) {
+async function queryManyContracts({ contracts = [], chain, data, permitFailure = false}) {
   const parallelLimit = 25
   const { results, errors } = await PromisePool
     .withConcurrency(parallelLimit)
     .for(contracts)
     .process(async (contract) => queryContract({ contract, chain, data }))
 
-  if (errors && errors.length) throw errors[0]
+  if (!permitFailure && errors && errors.length) throw errors[0]
 
   return results
 }
